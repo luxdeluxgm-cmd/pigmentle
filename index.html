@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PIGMENTLE</title>
+    <meta name="description" content="Daily CMYK color mixing puzzle." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/index.css" />
+  </head>
+  <body class="min-h-screen flex flex-col overflow-x-hidden bg-paper text-ink antialiased selection:bg-ink selection:text-paper transition-colors">
+    <header class="w-full border-b-2 border-ink bg-paper sticky top-0 z-30">
+      <div class="max-w-md md:max-w-5xl mx-auto px-3 md:px-6 h-12 md:h-14 flex items-center justify-between">
+        <div class="flex items-baseline gap-2.5">
+          <h1 class="font-display text-lg md:text-xl font-bold tracking-tight uppercase">PIGMENTLE</h1>
+          <span id="puzzle-number-badge" class="font-mono-spec text-xs text-muted">#001</span>
+        </div>
+
+        <nav class="hidden md:flex items-center border-2 border-ink divide-x-2 divide-ink bg-card" aria-label="Game menu">
+          <button type="button" data-open-modal="modal-how-to-play" class="px-3.5 py-1.5 text-xs font-mono-spec font-bold uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors cursor-pointer">
+            Rules
+          </button>
+          <button type="button" data-open-modal="modal-stats" class="px-3.5 py-1.5 text-xs font-mono-spec font-bold uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors cursor-pointer">
+            Stats
+          </button>
+          <button type="button" data-open-modal="modal-results" class="px-3.5 py-1.5 text-xs font-mono-spec font-bold uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors cursor-pointer">
+            Share
+          </button>
+          <button type="button" data-open-modal="modal-account" class="px-3.5 py-1.5 text-xs font-mono-spec font-bold uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors cursor-pointer">
+            Account
+          </button>
+          <button type="button" data-toggle-theme class="px-3.5 py-1.5 text-xs font-mono-spec font-bold uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors cursor-pointer">
+            <span id="theme-desktop-label">Dark</span>
+          </button>
+        </nav>
+
+        <button
+          id="btn-burger"
+          type="button"
+          class="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-[5px] cursor-pointer relative shrink-0"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+          aria-controls="burger-menu"
+        >
+          <span class="burger-line burger-line-1 w-5 h-[2px] bg-ink"></span>
+          <span class="burger-line burger-line-2 w-5 h-[2px] bg-ink"></span>
+          <span class="burger-line burger-line-3 w-5 h-[2px] bg-ink"></span>
+        </button>
+      </div>
+
+      <div id="burger-menu" class="md:hidden burger-menu-panel bg-card">
+        <div class="burger-menu-inner">
+          <nav class="max-w-md mx-auto grid grid-cols-2 divide-x divide-y divide-ink/20 border-t border-ink/20" aria-label="Mobile game menu">
+            <button type="button" data-open-modal="modal-how-to-play" class="py-3 px-4 text-left text-xs font-mono-spec font-bold uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors cursor-pointer">
+              Rules
+            </button>
+            <button type="button" data-open-modal="modal-stats" class="py-3 px-4 text-left text-xs font-mono-spec font-bold uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors cursor-pointer">
+              Stats
+            </button>
+            <button type="button" data-open-modal="modal-results" class="py-3 px-4 text-left text-xs font-mono-spec font-bold uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors cursor-pointer">
+              Share
+            </button>
+            <button type="button" data-open-modal="modal-account" class="py-3 px-4 text-left text-xs font-mono-spec font-bold uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors cursor-pointer">
+              Account
+            </button>
+            <button type="button" data-toggle-theme class="col-span-2 py-3 px-4 text-left text-xs font-mono-spec font-bold uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors cursor-pointer">
+              <span id="theme-label">Dark Mode</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 w-full max-w-md md:max-w-5xl mx-auto px-3 md:px-6 pt-3 md:pt-8 pb-8 space-y-4 md:space-y-0 md:grid md:grid-cols-12 md:gap-8 md:items-start">
+      <section aria-label="Target Swatch" class="md:col-span-5 md:sticky md:top-22">
+        <div class="border-2 border-ink bg-card">
+          <div id="target-swatch-box" class="w-full h-32 sm:h-36 md:h-80 lg:h-96"></div>
+          <div class="border-t-2 border-ink px-3 md:px-4 py-2.5 md:py-3.5 flex items-baseline justify-between gap-2">
+            <div>
+              <p id="target-title-label" class="font-display text-sm md:text-base font-bold tracking-tight uppercase leading-none">SWATCH 001</p>
+              <p id="target-spec-label" class="font-mono-spec text-[11px] md:text-xs text-muted mt-1">C —  M —  Y —  K —</p>
+            </div>
+            <span id="try-counter-label" class="font-mono-spec text-xs md:text-sm font-bold">0 / 5</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="space-y-4 md:col-span-7">
+        <form id="guess-form" class="space-y-2.5">
+          <div class="grid grid-cols-4 border-2 border-ink divide-x-2 divide-ink bg-card">
+            <div class="flex flex-col">
+              <div class="h-1.5 md:h-2 w-full bg-cyan"></div>
+              <label for="input-c" class="py-1 md:py-1.5 text-center font-mono-spec text-[11px] md:text-xs font-bold tracking-widest border-b border-ink/20">
+                C
+              </label>
+              <input id="input-c" type="number" inputmode="numeric" min="0" max="100" step="5" value="30" class="w-full text-center font-mono-spec text-xl md:text-2xl font-bold bg-transparent py-2 md:py-3 focus:outline-none focus:bg-paper" />
+              <div class="grid grid-cols-2 divide-x divide-ink/20 border-t border-ink/20">
+                <button type="button" data-channel="c" data-delta="-5" class="py-1.5 md:py-2 font-mono-spec text-xs font-bold hover:bg-ink hover:text-paper active:opacity-75 cursor-pointer">-5</button>
+                <button type="button" data-channel="c" data-delta="5" class="py-1.5 md:py-2 font-mono-spec text-xs font-bold hover:bg-ink hover:text-paper active:opacity-75 cursor-pointer">+5</button>
+              </div>
+            </div>
+
+            <div class="flex flex-col">
+              <div class="h-1.5 md:h-2 w-full bg-magenta"></div>
+              <label for="input-m" class="py-1 md:py-1.5 text-center font-mono-spec text-[11px] md:text-xs font-bold tracking-widest border-b border-ink/20">
+                M
+              </label>
+              <input id="input-m" type="number" inputmode="numeric" min="0" max="100" step="5" value="30" class="w-full text-center font-mono-spec text-xl md:text-2xl font-bold bg-transparent py-2 md:py-3 focus:outline-none focus:bg-paper" />
+              <div class="grid grid-cols-2 divide-x divide-ink/20 border-t border-ink/20">
+                <button type="button" data-channel="m" data-delta="-5" class="py-1.5 md:py-2 font-mono-spec text-xs font-bold hover:bg-ink hover:text-paper active:opacity-75 cursor-pointer">-5</button>
+                <button type="button" data-channel="m" data-delta="5" class="py-1.5 md:py-2 font-mono-spec text-xs font-bold hover:bg-ink hover:text-paper active:opacity-75 cursor-pointer">+5</button>
+              </div>
+            </div>
+
+            <div class="flex flex-col">
+              <div class="h-1.5 md:h-2 w-full bg-yellow"></div>
+              <label for="input-y" class="py-1 md:py-1.5 text-center font-mono-spec text-[11px] md:text-xs font-bold tracking-widest border-b border-ink/20">
+                Y
+              </label>
+              <input id="input-y" type="number" inputmode="numeric" min="0" max="100" step="5" value="30" class="w-full text-center font-mono-spec text-xl md:text-2xl font-bold bg-transparent py-2 md:py-3 focus:outline-none focus:bg-paper" />
+              <div class="grid grid-cols-2 divide-x divide-ink/20 border-t border-ink/20">
+                <button type="button" data-channel="y" data-delta="-5" class="py-1.5 md:py-2 font-mono-spec text-xs font-bold hover:bg-ink hover:text-paper active:opacity-75 cursor-pointer">-5</button>
+                <button type="button" data-channel="y" data-delta="5" class="py-1.5 md:py-2 font-mono-spec text-xs font-bold hover:bg-ink hover:text-paper active:opacity-75 cursor-pointer">+5</button>
+              </div>
+            </div>
+
+            <div class="flex flex-col">
+              <div class="h-1.5 md:h-2 w-full bg-ink"></div>
+              <label for="input-k" class="py-1 md:py-1.5 text-center font-mono-spec text-[11px] md:text-xs font-bold tracking-widest border-b border-ink/20">
+                K
+              </label>
+              <input id="input-k" type="number" inputmode="numeric" min="0" max="100" step="5" value="0" class="w-full text-center font-mono-spec text-xl md:text-2xl font-bold bg-transparent py-2 md:py-3 focus:outline-none focus:bg-paper" />
+              <div class="grid grid-cols-2 divide-x divide-ink/20 border-t border-ink/20">
+                <button type="button" data-channel="k" data-delta="-5" class="py-1.5 md:py-2 font-mono-spec text-xs font-bold hover:bg-ink hover:text-paper active:opacity-75 cursor-pointer">-5</button>
+                <button type="button" data-channel="k" data-delta="5" class="py-1.5 md:py-2 font-mono-spec text-xs font-bold hover:bg-ink hover:text-paper active:opacity-75 cursor-pointer">+5</button>
+              </div>
+            </div>
+          </div>
+
+          <button id="btn-submit-guess" type="submit" class="w-full py-3 md:py-3.5 px-4 border-2 border-ink font-mono-spec font-bold text-xs md:text-sm tracking-widest uppercase bg-ink text-paper hover:opacity-90 active:translate-y-[1px] transition cursor-pointer">
+            GUESS
+          </button>
+        </form>
+
+        <div id="gameover-banner" class="hidden border-2 border-ink bg-card p-3 md:p-4 items-center justify-between gap-2">
+          <div class="min-w-0">
+            <p id="gameover-title" class="font-display font-bold text-sm md:text-base uppercase truncate">SOLVED</p>
+            <p id="gameover-subtitle" class="font-mono-spec text-xs text-muted truncate"></p>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button id="btn-gameover-results" type="button" class="py-2 px-3 font-mono-spec font-bold text-xs uppercase bg-ink text-paper cursor-pointer">
+              Share
+            </button>
+            <button id="btn-reset-demo" type="button" class="py-2 px-2.5 font-mono-spec font-bold text-xs uppercase border border-ink cursor-pointer">
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <section aria-label="Guess Log">
+          <div id="guess-slots-container" class="border-2 border-ink divide-y-2 divide-ink bg-card"></div>
+        </section>
+      </div>
+    </main>
+
+    <div id="modal-how-to-play" class="hidden fixed inset-0 z-50 items-center justify-center p-4 bg-black/60" role="dialog" aria-modal="true">
+      <div class="w-full max-w-md border-2 border-ink bg-card p-5 space-y-4">
+        <div class="flex items-center justify-between border-b-2 border-ink pb-2.5">
+          <h2 class="font-display text-base font-bold uppercase tracking-tight">Rules</h2>
+          <button type="button" data-close-modal="modal-how-to-play" class="font-mono-spec text-xs font-bold px-2 py-0.5 border border-ink cursor-pointer">CLOSE</button>
+        </div>
+        <div class="space-y-3 text-xs sm:text-sm leading-relaxed">
+          <p>Match the daily <strong>Target Swatch</strong> in <strong>5 tries</strong> by mixing <strong>Cyan (C)</strong>, <strong>Magenta (M)</strong>, <strong>Yellow (Y)</strong>, and <strong>Key / Black (K)</strong>.</p>
+          <ul class="list-disc pl-5 space-y-1 text-xs text-muted">
+            <li>Every target channel is a multiple of <strong>5</strong> (0 to 100).</li>
+            <li>A channel counts as correct (<strong>✓</strong>) when your guess is within <strong>±2</strong> of the target.</li>
+            <li><strong>▲</strong> means the target is higher; <strong>▼</strong> means the target is lower.</li>
+          </ul>
+        </div>
+        <button type="button" data-close-modal="modal-how-to-play" class="w-full py-2.5 font-mono-spec font-bold text-xs uppercase tracking-widest bg-ink text-paper cursor-pointer">
+          Got It
+        </button>
+      </div>
+    </div>
+
+    <div id="modal-stats" class="hidden fixed inset-0 z-50 items-center justify-center p-4 bg-black/60" role="dialog" aria-modal="true">
+      <div class="w-full max-w-md border-2 border-ink bg-card p-5 space-y-4">
+        <div class="flex items-center justify-between border-b-2 border-ink pb-2.5">
+          <h2 class="font-display text-base font-bold uppercase tracking-tight">Stats</h2>
+          <button type="button" data-close-modal="modal-stats" class="font-mono-spec text-xs font-bold px-2 py-0.5 border border-ink cursor-pointer">CLOSE</button>
+        </div>
+        <div class="grid grid-cols-4 border border-ink divide-x divide-ink text-center">
+          <div class="p-2.5">
+            <div id="stat-played" class="font-mono-spec text-xl font-bold">0</div>
+            <div class="font-mono-spec text-[10px] uppercase text-muted">Played</div>
+          </div>
+          <div class="p-2.5">
+            <div id="stat-winrate" class="font-mono-spec text-xl font-bold">0%</div>
+            <div class="font-mono-spec text-[10px] uppercase text-muted">Win</div>
+          </div>
+          <div class="p-2.5">
+            <div id="stat-streak" class="font-mono-spec text-xl font-bold">0</div>
+            <div class="font-mono-spec text-[10px] uppercase text-muted">Streak</div>
+          </div>
+          <div class="p-2.5">
+            <div id="stat-best" class="font-mono-spec text-xl font-bold">0</div>
+            <div class="font-mono-spec text-[10px] uppercase text-muted">Best</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-results" class="hidden fixed inset-0 z-50 items-center justify-center p-4 bg-black/60" role="dialog" aria-modal="true">
+      <div class="w-full max-w-md border-2 border-ink bg-card p-5 space-y-4">
+        <div class="flex items-center justify-between border-b-2 border-ink pb-2.5">
+          <h2 class="font-display text-base font-bold uppercase tracking-tight">Share</h2>
+          <button type="button" data-close-modal="modal-results" class="font-mono-spec text-xs font-bold px-2 py-0.5 border border-ink cursor-pointer">CLOSE</button>
+        </div>
+        <div class="border border-ink p-3 flex items-center justify-between gap-3 bg-paper">
+          <pre id="share-text-preview" class="font-mono-spec text-xs leading-relaxed select-all"></pre>
+          <button id="btn-copy-share" type="button" class="py-2 px-4 font-mono-spec font-bold text-xs uppercase bg-ink text-paper shrink-0 cursor-pointer">
+            Copy
+          </button>
+        </div>
+        <div class="flex items-center justify-between border border-ink px-3 py-2.5">
+          <span class="font-mono-spec text-xs uppercase text-muted">Next Puzzle (UTC)</span>
+          <span id="utc-countdown" class="font-mono-spec text-sm font-bold">00:00:00</span>
+        </div>
+        <div class="pt-1 flex items-center justify-between text-xs text-muted">
+          <span>Enjoying the game? Support the dev with a coffee.</span>
+          <a href="https://ko-fi.com" target="_blank" rel="noopener noreferrer" class="font-mono-spec font-bold text-ink underline">KO-FI</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-account" class="hidden fixed inset-0 z-50 items-center justify-center p-4 bg-black/60" role="dialog" aria-modal="true">
+      <div class="w-full max-w-md border-2 border-ink bg-card p-5 space-y-4">
+        <div class="flex items-center justify-between border-b-2 border-ink pb-2.5">
+          <h2 class="font-display text-base font-bold uppercase tracking-tight">Account</h2>
+          <button type="button" data-close-modal="modal-account" class="font-mono-spec text-xs font-bold px-2 py-0.5 border border-ink cursor-pointer">CLOSE</button>
+        </div>
+        <div id="account-status-box" class="border border-ink p-3 text-xs space-y-1 bg-paper"></div>
+        <div id="account-actions" class="space-y-2">
+          <button id="btn-link-google" type="button" class="w-full py-2.5 px-4 font-mono-spec font-bold text-xs uppercase bg-ink text-paper cursor-pointer">
+            Sign in with Google
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
