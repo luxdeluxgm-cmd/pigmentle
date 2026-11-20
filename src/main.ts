@@ -12,14 +12,87 @@ import {
   linkGoogleAccount,
 } from './supabase';
 
+interface SavedState {
+  puzzleNumber: number;
+  guesses: GuessRow[];
+  currentGuess: CMYK;
+}
+
+interface SavedStats {
+  played: number;
+  wins: number;
+  currentStreak: number;
+  bestStreak: number;
+  lastCompletedPuzzle: number | null;
+}
+
 const TARGET_CMYK: CMYK = { c: 15, m: 65, y: 45, k: 5 };
 const TARGET_NAME = 'TERRACOTTA';
 const PUZZLE_NUMBER = 1;
 
-let currentGuess: CMYK = { c: 30, m: 30, y: 30, k: 0 };
-let guesses: GuessRow[] = [];
-let darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const THEME_KEY = 'pigmentle_theme';
+const STATE_KEY = 'pigmentle_state';
+const STATS_KEY = 'pigmentle_stats';
+
+function loadTheme(): boolean {
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved === 'dark') return true;
+  if (saved === 'light') return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function loadState(): SavedState {
+  try {
+    const raw = localStorage.getItem(STATE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as SavedState;
+      if (parsed.puzzleNumber === PUZZLE_NUMBER && Array.isArray(parsed.guesses)) {
+        return parsed;
+      }
+    }
+  } catch {}
+  return {
+    puzzleNumber: PUZZLE_NUMBER,
+    guesses: [],
+    currentGuess: { c: 30, m: 30, y: 30, k: 0 },
+  };
+}
+
+function loadStats(): SavedStats {
+  try {
+    const raw = localStorage.getItem(STATS_KEY);
+    if (raw) {
+      return JSON.parse(raw) as SavedStats;
+    }
+  } catch {}
+  return {
+    played: 0,
+    wins: 0,
+    currentStreak: 0,
+    bestStreak: 0,
+    lastCompletedPuzzle: null,
+  };
+}
+
+const initialState = loadState();
+let currentGuess: CMYK = { ...initialState.currentGuess };
+let guesses: GuessRow[] = [...initialState.guesses];
+let stats: SavedStats = loadStats();
+let darkMode = loadTheme();
 let burgerOpen = false;
+
+function saveState() {
+  const payload: SavedState = {
+    puzzleNumber: PUZZLE_NUMBER,
+    guesses,
+    currentGuess,
+  };
+  localStorage.setItem(STATE_KEY, JSON.stringify(payload));
+}
+
+function saveStats() {
+  localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+}
 
 const targetSwatchBox = document.getElementById('target-swatch-box')!;
 const targetTitleLabel = document.getElementById('target-title-label')!;
@@ -45,6 +118,10 @@ const inputs: Record<keyof CMYK, HTMLInputElement> = {
   k: document.getElementById('input-k') as HTMLInputElement,
 };
 
+(['c', 'm', 'y', 'k'] as const).forEach((ch) => {
+  inputs[ch].value = String(currentGuess[ch]);
+});
+
 function setBurgerOpen(next: boolean) {
   burgerOpen = next;
   burgerBtn.classList.toggle('is-open', burgerOpen);
@@ -54,6 +131,7 @@ function setBurgerOpen(next: boolean) {
 
 function applyTheme() {
   document.documentElement.classList.toggle('dark', darkMode);
+  localStorage.setItem(THEME_KEY, darkMode ? 'dark' : 'light');
   themeLabel.textContent = darkMode ? 'Light Mode' : 'Dark Mode';
   themeDesktopLabel.textContent = darkMode ? 'Light' : 'Dark';
 }
@@ -165,10 +243,11 @@ function render() {
   guessSlotsContainer.innerHTML = rowsHtml.join('');
   shareTextPreview.textContent = buildShareText();
 
-  document.getElementById('stat-played')!.textContent = over ? '1' : '0';
-  document.getElementById('stat-winrate')!.textContent = won ? '100%' : '0%';
-  document.getElementById('stat-streak')!.textContent = won ? '1' : '0';
-  document.getElementById('stat-best')!.textContent = won ? '1' : '0';
+  const winPct = stats.played > 0 ? Math.round((stats.wins / stats.played) * 100) : 0;
+  document.getElementById('stat-played')!.textContent = String(stats.played);
+  document.getElementById('stat-winrate')!.textContent = `${winPct}%`;
+  document.getElementById('stat-streak')!.textContent = String(stats.currentStreak);
+  document.getElementById('stat-best')!.textContent = String(stats.bestStreak);
 }
 
 function openModal(id: string) {
@@ -194,6 +273,7 @@ burgerBtn.addEventListener('click', () => {
   inputs[ch].addEventListener('input', () => {
     const parsed = parseInt(inputs[ch].value, 10);
     currentGuess[ch] = Number.isNaN(parsed) ? 0 : clampChannel(parsed);
+    saveState();
   });
 });
 
@@ -203,6 +283,7 @@ document.querySelectorAll<HTMLButtonElement>('[data-channel]').forEach((btn) => 
     const delta = parseInt(btn.dataset.delta || '0', 10);
     currentGuess[ch] = clampChannel(currentGuess[ch] + delta);
     inputs[ch].value = String(currentGuess[ch]);
+    saveState();
   });
 });
 
@@ -221,6 +302,22 @@ guessForm.addEventListener('submit', (e) => {
     },
   });
 
+  saveState();
+
+  if (isGameOver() && stats.lastCompletedPuzzle !== PUZZLE_NUMBER) {
+    const won = isWon();
+    stats.played += 1;
+    if (won) {
+      stats.wins += 1;
+      stats.currentStreak += 1;
+      stats.bestStreak = Math.max(stats.bestStreak, stats.currentStreak);
+    } else {
+      stats.currentStreak = 0;
+    }
+    stats.lastCompletedPuzzle = PUZZLE_NUMBER;
+    saveStats();
+  }
+
   render();
   if (isGameOver()) {
     setTimeout(() => openModal('modal-results'), 350);
@@ -233,6 +330,11 @@ document.getElementById('btn-reset-demo')!.addEventListener('click', () => {
   (['c', 'm', 'y', 'k'] as const).forEach((ch) => {
     inputs[ch].value = String(currentGuess[ch]);
   });
+  if (stats.lastCompletedPuzzle === PUZZLE_NUMBER) {
+    stats.lastCompletedPuzzle = null;
+    saveStats();
+  }
+  saveState();
   render();
 });
 
