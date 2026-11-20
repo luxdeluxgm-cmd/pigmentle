@@ -10,6 +10,7 @@ import {
 import {
   initAuth,
   linkGoogleAccount,
+  deleteAccountAndData,
 } from './supabase';
 
 interface SavedState {
@@ -30,9 +31,9 @@ const TARGET_CMYK: CMYK = { c: 15, m: 65, y: 45, k: 5 };
 const TARGET_NAME = 'TERRACOTTA';
 const PUZZLE_NUMBER = 1;
 
-const THEME_KEY = 'pigmentle_theme';
-const STATE_KEY = 'pigmentle_state';
-const STATS_KEY = 'pigmentle_stats';
+const THEME_KEY = 'subtra_theme';
+const STATE_KEY = 'subtra_state';
+const STATS_KEY = 'subtra_stats';
 
 function loadTheme(): boolean {
   const saved = localStorage.getItem(THEME_KEY);
@@ -80,6 +81,7 @@ let guesses: GuessRow[] = [...initialState.guesses];
 let stats: SavedStats = loadStats();
 let darkMode = loadTheme();
 let burgerOpen = false;
+let confirmDeleteArmed = false;
 
 function saveState() {
   const payload: SavedState = {
@@ -106,6 +108,8 @@ const guessSlotsContainer = document.getElementById('guess-slots-container')!;
 const shareTextPreview = document.getElementById('share-text-preview')!;
 const utcCountdown = document.getElementById('utc-countdown')!;
 const accountStatusBox = document.getElementById('account-status-box')!;
+const accountFeedback = document.getElementById('account-feedback')!;
+const deleteAccountBtn = document.getElementById('btn-delete-account')!;
 const burgerBtn = document.getElementById('btn-burger')!;
 const burgerMenu = document.getElementById('burger-menu')!;
 const themeLabel = document.getElementById('theme-label')!;
@@ -187,7 +191,7 @@ function buildShareText(): string {
           )
           .join('\n')
       : '🟩🔼🔽🟩';
-  return `Pigment #${PUZZLE_NUMBER} ${score}\n${grid}`;
+  return `Subtra #${PUZZLE_NUMBER} ${score}\n${grid}`;
 }
 
 function render() {
@@ -250,8 +254,15 @@ function render() {
   document.getElementById('stat-best')!.textContent = String(stats.bestStreak);
 }
 
+function resetDeleteConfirmation() {
+  confirmDeleteArmed = false;
+  deleteAccountBtn.textContent = 'Delete Account & Data';
+}
+
 function openModal(id: string) {
   setBurgerOpen(false);
+  resetDeleteConfirmation();
+  accountFeedback.classList.add('hidden');
   const el = document.getElementById(id);
   if (!el) return;
   el.classList.remove('hidden');
@@ -365,12 +376,47 @@ document.getElementById('btn-copy-share')!.addEventListener('click', async (e) =
 });
 
 document.getElementById('btn-link-google')!.addEventListener('click', async () => {
-  await linkGoogleAccount();
+  const err = await linkGoogleAccount();
+  if (err) {
+    accountFeedback.textContent = err;
+    accountFeedback.classList.remove('hidden');
+  }
+});
+
+deleteAccountBtn.addEventListener('click', async () => {
+  if (!confirmDeleteArmed) {
+    confirmDeleteArmed = true;
+    deleteAccountBtn.textContent = 'Tap again to permanently erase all data';
+    return;
+  }
+  const err = await deleteAccountAndData();
+  if (err) {
+    accountFeedback.textContent = err;
+    accountFeedback.classList.remove('hidden');
+    resetDeleteConfirmation();
+    return;
+  }
+  guesses = [];
+  currentGuess = { c: 30, m: 30, y: 30, k: 0 };
+  stats = {
+    played: 0,
+    wins: 0,
+    currentStreak: 0,
+    bestStreak: 0,
+    lastCompletedPuzzle: null,
+  };
+  (['c', 'm', 'y', 'k'] as const).forEach((ch) => {
+    inputs[ch].value = String(currentGuess[ch]);
+  });
+  resetDeleteConfirmation();
+  render();
+  accountFeedback.textContent = 'All account and local data erased.';
+  accountFeedback.classList.remove('hidden');
 });
 
 initAuth((user) => {
   if (!user) {
-    accountStatusBox.innerHTML = `<p class="font-mono-spec font-bold">GUEST SESSION</p><p class="text-muted">Sign in with Google to sync your streak across devices.</p>`;
+    accountStatusBox.innerHTML = `<p class="font-mono-spec font-bold">LOCAL SESSION</p><p class="text-muted">Progress is stored on this device. Sign in with Google once connected to sync across devices.</p>`;
     return;
   }
   const isAnon = Boolean(user.is_anonymous ?? true);

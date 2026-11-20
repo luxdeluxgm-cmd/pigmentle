@@ -3,21 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PIGMENTLE</title>
+    <title>SUBTRA</title>
     <meta name="description" content="Daily CMYK color mixing puzzle." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="/src/index.css" />
   </head>
   <body class="min-h-screen flex flex-col overflow-x-hidden bg-paper text-ink antialiased selection:bg-ink selection:text-paper transition-colors">
     <header class="w-full border-b-2 border-ink bg-paper sticky top-0 z-30">
       <div class="max-w-md md:max-w-5xl mx-auto px-3 md:px-6 h-12 md:h-14 flex items-center justify-between">
         <div class="flex items-baseline gap-2.5">
-          <h1 class="font-display text-lg md:text-xl font-bold tracking-tight uppercase">PIGMENTLE</h1>
+          <h1 class="font-display text-lg md:text-xl font-bold tracking-tight uppercase">SUBTRA</h1>
           <span id="puzzle-number-badge" class="font-mono-spec text-xs text-muted">#001</span>
         </div>
 
@@ -255,7 +249,11 @@
           <button id="btn-link-google" type="button" class="w-full py-2.5 px-4 font-mono-spec font-bold text-xs uppercase bg-ink text-paper cursor-pointer">
             Sign in with Google
           </button>
+          <button id="btn-delete-account" type="button" class="w-full py-2 px-4 font-mono-spec font-bold text-xs uppercase border border-ink text-muted hover:text-ink cursor-pointer">
+            Delete Account &amp; Data
+          </button>
         </div>
+        <p id="account-feedback" class="hidden text-xs font-mono-spec p-2.5 border border-ink bg-paper"></p>
       </div>
     </div>
 
@@ -266,25 +264,36 @@
           <button type="button" data-close-modal="modal-about" class="font-mono-spec text-xs font-bold px-2 py-0.5 border border-ink cursor-pointer">CLOSE</button>
         </div>
 
-        <div class="space-y-2 text-xs sm:text-sm leading-relaxed">
-          <h3 class="font-mono-spec text-xs font-bold uppercase tracking-wider">Creator</h3>
-          <p class="text-muted">
-            Pigmentle is an independent daily color-mixing puzzle built by <a href="https://jantokarzewski.pl/en" target="_blank" rel="noopener noreferrer" class="font-bold text-ink underline hover:opacity-80">Jan Tokarzewski</a>.
+        <div class="space-y-1.5 text-xs leading-relaxed text-muted">
+          <h3 class="font-mono-spec text-xs uppercase tracking-wider text-ink">Creator</h3>
+          <p>
+            Subtra is an independent daily color-mixing puzzle by <a href="https://jantokarzewski.pl/en" target="_blank" rel="noopener noreferrer" class="text-ink underline hover:opacity-80">Jan Tokarzewski</a>.
           </p>
         </div>
 
-        <div class="border-t border-ink/20 pt-3 space-y-2 text-xs leading-relaxed">
-          <h3 class="font-mono-spec text-xs font-bold uppercase tracking-wider">Privacy Policy</h3>
-          <p class="text-muted">
-            We store only what is required to make the game work:
+        <div class="border-t border-ink/20 pt-3 space-y-2.5 text-xs leading-relaxed text-muted">
+          <h3 class="font-mono-spec text-xs uppercase tracking-wider text-ink">Privacy Policy</h3>
+          <p>
+            The data controller is Jan Tokarzewski (<a href="https://jantokarzewski.pl/en" target="_blank" rel="noopener noreferrer" class="underline text-ink">jantokarzewski.pl/en</a>). For privacy questions or data requests, email <a href="mailto:dev@jantokarzewski.pl" class="text-ink underline">dev@jantokarzewski.pl</a>.
           </p>
-          <ul class="list-disc pl-5 space-y-1 text-muted">
-            <li>An anonymous account ID created automatically so your daily progress and streak persist.</li>
-            <li>Your Google email address and profile name, only if you choose to sign in with Google.</li>
-            <li>Your puzzle guesses, game results, and streaks.</li>
-          </ul>
-          <p class="text-muted">
-            We do not sell your data or run advertising trackers. To request deletion of your account and data, contact the developer.
+          <p>
+            To run the game and prevent abuse (Art. 6(1)(b) and (f) GDPR), we store an anonymous session ID, your daily guesses, game results, and streak counts. If you choose to sign in with Google to sync your progress across devices, your email address and basic Google profile identifier are also stored.
+          </p>
+          <p>
+            Subtra does not use advertising, profiling, or analytics cookies, and all fonts are self-hosted. Browser localStorage is used only for strictly necessary technical storage: remembering your theme setting, active puzzle state, local stats, and login session.
+          </p>
+          <p>
+            The site is hosted on Cloudflare Pages and uses Supabase for database and authentication services (and Google Ireland Limited if you use Google Sign-In). User data is never sold or shared with advertisers.
+          </p>
+          <p>
+            Under GDPR (Articles 15–21), you have the right to access, correct, delete, restrict, or export your data, and to file a complaint with your data protection authority (in Poland: PUODO). You can permanently delete your account and all stored data at any time using the Delete Account &amp; Data button in the Account menu, or by emailing <a href="mailto:dev@jantokarzewski.pl" class="text-ink underline">dev@jantokarzewski.pl</a>.
+          </p>
+        </div>
+
+        <div class="border-t border-ink/20 pt-3 space-y-1.5 text-xs leading-relaxed text-muted">
+          <h3 class="font-mono-spec text-xs uppercase tracking-wider text-ink">Terms</h3>
+          <p>
+            Subtra is provided free of charge as-is without warranty. Color names are descriptive only; Subtra is an independent project and is not affiliated with Pantone LLC or any ink manufacturer.
           </p>
         </div>
       </div>

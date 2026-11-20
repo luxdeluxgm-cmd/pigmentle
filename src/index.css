@@ -1,11 +1,14 @@
 @import "tailwindcss";
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource-variable/jetbrains-mono";
 
 :root {
   --paper: #F4F1EA;
   --card: #FFFFFF;
   --ink: #141413;
   --muted: #6B6860;
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans Variable', system-ui, -apple-system, sans-serif;
 }
 
 .dark {
@@ -26,11 +29,11 @@
 }
 
 h1, h2, h3, .font-display {
-  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  font-family: 'Space Grotesk Variable', system-ui, -apple-system, sans-serif;
 }
 
 .font-mono-spec {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-family: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
   font-variant-numeric: tabular-nums;
 }
 

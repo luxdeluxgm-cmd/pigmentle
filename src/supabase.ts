@@ -41,7 +41,7 @@ export async function initAuth(onUserChange: (user: User | null) => void): Promi
 }
 
 export async function linkGoogleAccount(): Promise<string | null> {
-  if (!supabase) return 'Supabase is not configured.';
+  if (!supabase) return 'Database is not connected yet.';
   const { error } = await supabase.auth.linkIdentity({
     provider: 'google',
     options: { redirectTo: window.location.origin },
@@ -50,7 +50,7 @@ export async function linkGoogleAccount(): Promise<string | null> {
 }
 
 export async function signInWithGoogle(): Promise<string | null> {
-  if (!supabase) return 'Supabase is not configured.';
+  if (!supabase) return 'Database is not connected yet.';
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: window.location.origin },
@@ -58,8 +58,14 @@ export async function signInWithGoogle(): Promise<string | null> {
   return error ? error.message : null;
 }
 
-export async function signOutToGuest(): Promise<void> {
-  if (!supabase) return;
-  await supabase.auth.signOut();
-  await supabase.auth.signInAnonymously();
+export async function deleteAccountAndData(): Promise<string | null> {
+  if (supabase) {
+    const { error } = await supabase.rpc('delete_own_account');
+    if (error) return error.message;
+    await supabase.auth.signOut();
+  }
+  localStorage.removeItem('subtra_state');
+  localStorage.removeItem('subtra_stats');
+  localStorage.removeItem('subtra_theme');
+  return null;
 }
